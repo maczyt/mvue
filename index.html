@@ -10,10 +10,18 @@
 
 <body>
     <div id="app">
+        <div v-html="htmlData"></div>
         <p> {{count}} </p>
         <p v-text="count"></p>
         <button @click="increment">+</button>
         <button @click="decrement">-</button>
+
+        <p v-show="showFalse">Show is false</p>
+        <p v-show="showTrue">Show is true</p>
+
+        <br>
+        <input type="text" v-model="name">
+        <p>Name: {{ name }}</p>
     </div>
 </body>
 

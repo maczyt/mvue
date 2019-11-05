@@ -4,6 +4,12 @@ window.vm = new MVue({
     data() {
         return {
             count: 1,
+            htmlData: `
+                <h1>Hello MVue</h1>
+            `,
+            showFalse: false,
+            showTrue: true,
+            name: 'yutao'
         }
     },
     methods: {

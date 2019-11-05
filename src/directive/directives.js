@@ -1,4 +1,5 @@
 import { off, on } from "../utils";
+import modelDirective from './model';
 
 // 指令优先级
 const PRIORITY = {
@@ -39,5 +40,39 @@ export default {
                 off(this.el, this.descriptor.arg, this.handler);
             }
         }
+    },
+
+    // v-html
+    html: {
+        update(value) {
+            this.el.innerHTML = value;
+        }
+    },
+
+    // v-show
+    show: {
+        update(value) {
+            this.el.style.display = !!value ? '' : 'none';
+        }
+    },
+
+    // v-bind
+    bind: {
+        priority: PRIORITY.bind,
+        bind() {
+            // 要bind的attr属性名
+            this.attr = this.descriptor.arg;
+        },
+        update(value) {
+            // 直接写成设置attr
+            this.el.setAttribute(this.attr, value);
+            // 父子组件传参待补充
+        }
+    },
+
+    // v-model
+    model: {
+        priority: PRIORITY.model,
+        ...modelDirective,
     }
 }
