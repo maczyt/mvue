@@ -1,5 +1,6 @@
 import { RE, toArray } from "../utils";
 import Directive from "../directive";
+import { nextTick } from "../observer/scheduler";
 // 存放指令的descriptor
 const des = [];
 let pending = false;
@@ -96,13 +97,13 @@ function compileElementAttrs(el, vm) {
       onAttr(name, value);
     } else if (RE.bind.test(name)) {
       bindAttr(name, value);
-    } else if (matched = name.match(RE.dirAttr)) {
-      if (name === 'v-text') {
+    } else if ((matched = name.match(RE.dirAttr))) {
+      if (name === "v-text") {
         textAttr(name, value);
       } else {
         otherAttr(name, value, matched[1]);
       }
-      if (name === 'v-for') {
+      if (name === "v-for") {
         isFor = true;
       }
     }
@@ -147,7 +148,8 @@ function compileElementAttrs(el, vm) {
   function textAttr(name, value) {
     isRemove = true;
     const descriptor = {
-      vm, el,
+      vm,
+      el,
       name: "text",
       def: directives.text,
       attr: name,
@@ -162,7 +164,8 @@ function compileElementAttrs(el, vm) {
   function otherAttr(name, value, directiveName) {
     isRemove = true;
     des.push({
-      vm, el,
+      vm,
+      el,
       name: name.replace(/^v-/, ""),
       expression: value,
       def: directives[directiveName],
@@ -170,22 +173,83 @@ function compileElementAttrs(el, vm) {
       arg: void 0
     });
   }
+}
 
-  // 应用过滤器
-  function applyFilters(value, descriptor) {
-    const values = value.split("|");
-    if (values.length > 1) {
-      descriptor.expression = values.shift();
-      descriptor.filters = values.map(v => ({ name: v.trim() }));
-    } else {
-      descriptor.expression = value;
+// 解析文本节点
+function compileTextNode(node, vm) {
+  const tokens = parseText(node.nodeValue, vm);
+  if (!tokens.length) return;
+  const frag = document.createDocumentFragment();
+  let el;
+  for (let token of tokens) {
+    el = token.template ? processTextToken(token, vm) : document.createTextNode(token.value);
+    frag.appendChild(el);
+    if (token.template) {
+      des.push(token.descriptor);
     }
   }
 
+  nextTick(() => {
+    node.replaceWith(frag);
+  });
+
+  // 处理{{xxx}}
+  // 就是文本节点使用了v-text指令
+  function processTextToken(token, vm) {
+    const {
+      $options: { directives }
+    } = vm;
+    const el = document.createTextNode(" ");
+    const descriptor = {
+      vm, el,
+      name: "text",
+      def: directives.text,
+    };
+    applyFilters(token.value, descriptor);
+    token.descriptor = descriptor;
+    return el;
+  }
 }
 
-function compileTextNode(node, vm) {
-  
+// 解析文本->tokens
+// 如: Count: {{ count }} -> ['Count', { name: count, def: text, ... }]
+function parseText(text, vm) {
+  let index = 0;
+  let lastIndex = 0;
+  let match;
+  const tokens = [];
+  while ((match = RE.template.exec(text))) {
+    index = match.index;
+    if (index > lastIndex) {
+      tokens.push({
+        value: text.slice(lastIndex, index)
+      });
+    }
+    // console.log('match', match);
+    tokens.push({
+      value: match[1],
+      template: true
+    });
+    lastIndex = index + match[0].length;
+  }
+
+  if (lastIndex < text.length) {
+    tokens.push({
+      value: text.slice(lastIndex)
+    });
+  }
+
+  return tokens;
 }
 
 // utils
+// 应用过滤器
+function applyFilters(value, descriptor) {
+  const values = value.split("|");
+  if (values.length > 1) {
+    descriptor.expression = values.shift();
+    descriptor.filters = values.map(v => ({ name: v.trim() }));
+  } else {
+    descriptor.expression = value;
+  }
+}
