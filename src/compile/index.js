@@ -11,18 +11,18 @@ export function compile(vm, el) {
       compileNodes(el.childNodes, vm);
     }
   }
-
+  // 是否在处理中
   if (!pending) {
     pending = true;
     let dir, descriptor;
     while (des.length) {
-        descriptor = des.shift();
-        dir = new Directive(descriptor, vm);
-        dir._bind(); // 指令绑定起来: 创建watcher去订阅dep
-        descriptor.vm._directives.push(dir);
+      descriptor = des.shift();
+      dir = new Directive(descriptor, vm);
+      dir._bind(); // 指令绑定起来: 创建watcher去订阅dep
+      descriptor.vm._directives.push(dir);
     }
     pending = false;
-    vm._callHook('mounted');
+    vm._callHook("mounted");
   }
 }
 
@@ -42,6 +42,7 @@ function compileNodes(nodes, vm) {
   }
 }
 
+// 解析元素
 function compileElement(node, vm) {
   const { $options: options } = vm;
   // 从MVue.options merge来的
@@ -74,96 +75,117 @@ function compileElement(node, vm) {
     });
   } else if (node.hasAttributes()) {
     // 普通html 元素 && 元素上有属性
-    let matched;
-    let isFor = false;
-    let isRemove = false;
-    const attrs = toArray(node.attributes);
-    for (let attr of attrs) {
-      let { name, value } = attr;
-      name = name.trim();
-      value = value.trim();
-      if (RE.on.test(name)) {
-        isRemove = true;
-        des.push({
-          vm,
-          el: node,
-          name: "on",
-          expression: value,
-          def: directives.on,
-          attr: name,
-          arg: name.replace(RE.on, "")
-        });
-      } else if (RE.bind.test(name)) {
-        isRemove = true;
-        const values = value.split("|");
-        const descriptor = {
-          vm,
-          el: node,
-          name: "bind",
-          def: directives.bind,
-          attr: name,
-          arg: name.replace(RE.bind, "")
-        };
-        if (values.length > 1) {
-          const expression = values.shift();
-          const filters = values.map(v => {
-            return {
-              name: v.trim()
-            };
-          });
-          descriptor.expression = expression;
-          descriptor.filters = filters;
-        } else {
-          descriptor.expression = value;
-        }
-        des.push(descriptor);
-      } else if ((matched = name.match(RE.dirAttr))) {
-        if (name.includes("v-text")) {
-          isRemove = true;
-          const values = value.split("|");
-          const descriptor = {
-            vm,
-            el: node,
-            name: "text",
-            def: directives.text,
-            attr: name,
-            arg: name.replace(RE.bind, "")
-          };
-          if (values.length > 1) {
-            descriptor.expression = values.shift();
-            descriptor.filters = values.map(v => {
-              return {
-                name: v.trim()
-              };
-            });
-          } else {
-            descriptor.expression = value;
-          }
-          des.push(descriptor);
-        } else if (!name.includes("v-else")) {
-          isRemove = true;
-          des.push({
-            vm,
-            el: node,
-            name: name.replace(/^v-/, ""),
-            expression: value,
-            def: directives[matched[1]],
-            attr: name,
-            arg: void 0
-          });
-        }
-
-        if (name.includes("v-for")) {
-          isFor = true;
-        }
-      }
-      if (isRemove) {
-        node.removeAttribute(name);
-        isRemove = false;
-      }
-    }
-    return isFor;
+    return compileElementAttrs(node, vm);
   }
 }
 
-function compileTextNode(node, vm) {}
+// 编译处理元素的attrs
+function compileElementAttrs(el, vm) {
+  const {
+    $options: { directives }
+  } = vm;
+
+  let matched;
+  let isFor = false;
+  let isRemove = false;
+  const attrs = toArray(el.attributes);
+  for (let attr of attrs) {
+    const name = attr.name.trim();
+    const value = attr.value.trim();
+    if (RE.on.test(name)) {
+      onAttr(name, value);
+    } else if (RE.bind.test(name)) {
+      bindAttr(name, value);
+    } else if (matched = name.match(RE.dirAttr)) {
+      if (name === 'v-text') {
+        textAttr(name, value);
+      } else {
+        otherAttr(name, value, matched[1]);
+      }
+      if (name === 'v-for') {
+        isFor = true;
+      }
+    }
+    if (isRemove) {
+      el.removeAttribute(name);
+      isRemove = false;
+    }
+  }
+  return isFor;
+
+  // 处理v-on:click或@click
+  function onAttr(name, value) {
+    isRemove = true;
+    des.push({
+      vm,
+      el,
+      name: "on",
+      expression: value,
+      def: directives.on,
+      attr: name,
+      arg: name.replace(RE.on, "")
+    });
+  }
+
+  // 处理v-bind:foo或:foo
+  function bindAttr(name, value) {
+    isRemove = true;
+    const descriptor = {
+      vm,
+      el,
+      name: "bind",
+      def: directives.bind,
+      attr: name,
+      arg: name.replace(RE.bind, "")
+    };
+    // 过滤器
+    applyFilters(value, descriptor);
+    des.push(descriptor);
+  }
+
+  // 单独处理v-text
+  function textAttr(name, value) {
+    isRemove = true;
+    const descriptor = {
+      vm, el,
+      name: "text",
+      def: directives.text,
+      attr: name,
+      arg: name.replace(RE.bind, "")
+    };
+    // 过滤器
+    applyFilters(value, descriptor);
+    des.push(descriptor);
+  }
+
+  // 处理其它指令
+  function otherAttr(name, value, directiveName) {
+    isRemove = true;
+    des.push({
+      vm, el,
+      name: name.replace(/^v-/, ""),
+      expression: value,
+      def: directives[directiveName],
+      attr: name,
+      arg: void 0
+    });
+  }
+
+  // 应用过滤器
+  function applyFilters(value, descriptor) {
+    const values = value.split("|");
+    if (values.length > 1) {
+      descriptor.expression = values.shift();
+      descriptor.filters = values.map(v => ({ name: v.trim() }));
+    } else {
+      descriptor.expression = value;
+    }
+  }
+
+}
+
+function compileTextNode(node, vm) {
+  
+}
+
+// utils

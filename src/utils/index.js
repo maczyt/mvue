@@ -22,9 +22,11 @@ export function getIn(obj, keys) {
     return keys.reduce((m, key) => (m[key] = obj[key], m), Object.create(null));
 }
 
+/* DOM */
 export function query(selector) {
     return document.querySelector(selector);
 }
+/* /DOM */
 
 export const toArray = Array.from;
 export const RE = {
