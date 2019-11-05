@@ -1,11 +1,15 @@
 import observe from '../observer';
+import { bind } from '../utils';
 
 function initProps() {
     console.log('init props');
 }
 
 function initMethods() {
-    console.log('init methods');
+    const { $options: { methods } } = this;
+    Object.keys(methods).forEach(key => {
+        this[key] = bind(methods[key], this);
+    });
 }
 
 function initData() {

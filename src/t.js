@@ -6,6 +6,14 @@ window.vm = new MVue({
             count: 1,
         }
     },
+    methods: {
+        increment() {
+            this.count ++;
+        },
+        decrement() {
+            this.count --;
+        }
+    },
     el: '#app',
 });
 

@@ -7,6 +7,9 @@ export function hasOwn(obj, key) {
 export function extend(to, from) {
     return Object.assign(to, from);
 }
+export function bind(fn, context) {
+    return fn.bind(context ? context : this);
+}
 export function makeGetterFn(body) {
     return new Function(`with(this) { return ${body} }`);
 }
@@ -25,6 +28,12 @@ export function getIn(obj, keys) {
 /* DOM */
 export function query(selector) {
     return document.querySelector(selector);
+}
+export function on(el, eventName, callback, useCapture) {
+    el.addEventListener(eventName, callback, useCapture);
+}
+export function off(el, eventName, callback) {
+    el.removeEventListener(eventName, callback);
 }
 /* /DOM */
 
