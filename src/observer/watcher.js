@@ -53,7 +53,13 @@ export default class Watcher {
     get() {
         const { vm } = this;
         Dep.target = this;
-        let value = this.getter.call(vm, vm);
+        let value;
+        try {
+            value = this.getter.call(vm, vm);
+        } catch(e) {
+            value = void 0;
+        }
+
         if (this.filters) {
             // 过滤器处理
         }

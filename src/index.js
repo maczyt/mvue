@@ -4,6 +4,7 @@ import mixins, {
     lifecycle,
     render,
 } from './mixins';
+import { useGlobal } from './global';
 import directives from './directive/directives';
 
 @mixins([
@@ -23,6 +24,6 @@ MVue.options = {
     components: {},
     filters: {},
 };
-
+useGlobal(MVue);
 window.MVue = MVue;
 export default MVue;

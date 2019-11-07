@@ -7,6 +7,9 @@ export function hasOwn(obj, key) {
 export function extend(to, from) {
     return Object.assign(to, from);
 }
+export function isObject(obj) {
+    return typeof obj === 'object';
+}
 export function bind(fn, context) {
     return fn.bind(context ? context : this);
 }

@@ -24,6 +24,7 @@ export default {
         }
     },
     update(value) {
+        if (!value) return;
         // 清除旧的list
         while (this.len) {
             this.anchorEnd.previousElementSibling.remove();
