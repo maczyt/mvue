@@ -5,7 +5,7 @@ import { nextTick } from "../observer/scheduler";
 const des = [];
 let pending = false;
 
-export function compile(vm, el) {
+export function compile(vm, el, isFor=false) {
   // 如果没有使用v-for，则继续解析子节点
   if (!compileNode(el, vm)) {
     if (el.hasChildNodes()) {
@@ -23,7 +23,7 @@ export function compile(vm, el) {
       descriptor.vm._directives.push(dir);
     }
     pending = false;
-    vm._callHook("mounted");
+    isFor || vm._callHook("mounted");
   }
 }
 

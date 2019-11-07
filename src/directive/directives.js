@@ -1,5 +1,6 @@
 import { off, on } from "../utils";
 import modelDirective from './model';
+import forDirective from './for';
 
 // 指令优先级
 const PRIORITY = {
@@ -74,5 +75,11 @@ export default {
     model: {
         priority: PRIORITY.model,
         ...modelDirective,
+    },
+
+    // v-for
+    for: {
+        priority: PRIORITY.for,
+        ...forDirective,
     }
 }

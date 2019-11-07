@@ -22,6 +22,12 @@
         <br>
         <input type="text" v-model="name">
         <p>Name: {{ name }}</p>
+        <br>
+        <ul>
+            <li v-for="(item, index) in list">
+                {{ item }}
+            </li>
+        </ul>
     </div>
 </body>
 
