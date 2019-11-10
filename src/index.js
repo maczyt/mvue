@@ -24,6 +24,12 @@ MVue.options = {
     components: {},
     filters: {},
 };
+
+// this is used to identify the "base" constructor to extend all plain-object
+// components with in Weex's multi-instance scenarios.
+// 来自Vue源码，不是很明白这么设置。
+MVue.options._base = MVue;
+
 useGlobal(MVue);
 window.MVue = MVue;
 export default MVue;
