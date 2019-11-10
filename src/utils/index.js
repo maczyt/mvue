@@ -69,6 +69,9 @@ export function on(el, eventName, callback, useCapture) {
 export function off(el, eventName, callback) {
     el.removeEventListener(eventName, callback);
 }
+export function domValue(value) {
+    return typeof value === 'undefined' ? '' : value;
+}
 /* /DOM */
 
 // 判断组件名是否一致 ref test/componentName.test.js

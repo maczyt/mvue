@@ -1,4 +1,4 @@
-import { on, off } from "../utils";
+import { on, off, domValue } from "../utils";
 
 const handlers = {
     // <input type="text" />
@@ -14,7 +14,7 @@ const handlers = {
             on(this.el, 'input', this.listener);
         },
         update(value) {
-            this.el.value = value;
+            this.el.value = domValue(value);
         },
         unbind() {
             off(this.el, 'input', this.listener);

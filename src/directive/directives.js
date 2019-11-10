@@ -1,4 +1,4 @@
-import { off, on } from "../utils";
+import { off, on, domValue } from "../utils";
 import modelDirective from './model';
 import forDirective from './for';
 import componentDirective from './component';
@@ -22,7 +22,7 @@ export default {
                 this.el.nodeType === 3 ? 'data' : 'textContent';
         },
         update(value) {
-            this.el[this.attr] = value;
+            this.el[this.attr] = domValue(value);
         }
     },
 
@@ -47,7 +47,7 @@ export default {
     // v-html
     html: {
         update(value) {
-            this.el.innerHTML = value;
+            this.el.innerHTML = domValue(value);
         }
     },
 
