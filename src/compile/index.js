@@ -1,4 +1,4 @@
-import { RE, toArray } from "../utils";
+import { RE, toArray, checkComponent } from "../utils";
 import Directive from "../directive";
 import { nextTick } from "../observer/scheduler";
 // 存放指令的descriptor
@@ -52,8 +52,8 @@ function compileElement(node, vm) {
 
   if (!RE.commonTag.test(tag) && !RE.reservedTag.test(tag)) {
     // 说明是一个自定义组件
-    if (options.components[tag]) {
-      // 这里其实可以增加判断: itemList、ItemList、item-list是相同的
+    const keys = options.components;
+    if (keys.some(key => checkComponent(key, tag))) {
       des.push({
         vm,
         el: node,
