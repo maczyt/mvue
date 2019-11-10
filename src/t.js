@@ -1,5 +1,23 @@
 import MVue from './index';
 
+const Sub = MVue.extend({
+    data() {
+        return {
+            name: 'sss',
+        }
+    }
+});
+
+window.subVm = new Sub({
+    data() {
+        return {
+            age: 24,
+        }
+    }
+})
+
+// console.log('Sub', Sub);
+
 window.vm = new MVue({
     data() {
         return {
