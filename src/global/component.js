@@ -1,4 +1,4 @@
-export default function component(id, definition) {
+export default function component(id, definition, isPrivate) {
     const self = this; // MVue or MVue instance
     if (!definition) {
         return self.options.components[id];
@@ -10,13 +10,16 @@ export default function component(id, definition) {
             definition = self.options._base.extend(definition);
         }
         // definition is MVue extend's subClass
-        if (typeof definition === 'function') {
-            definition = {
-                bind: definition,
-                update: definition,
-            }
+        // if (typeof definition === 'function') {
+        //     definition = {
+        //         bind: definition,
+        //         update: definition,
+        //     }
+        // }
+        if (!isPrivate) {
+            // 组件内定义的不写入全局
+            self.options.components[id] = definition;
         }
-        self.options.component[id] = definition;
         return definition;
     }
 }

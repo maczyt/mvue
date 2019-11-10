@@ -40,7 +40,28 @@ export function getIn(obj, keys) {
 
 /* DOM */
 export function query(selector) {
-    return document.querySelector(selector);
+    if (typeof selector === 'string') {
+        return document.querySelector(selector);
+    }
+    return selector;
+}
+// 节点替换
+export function replace(oldNode, newNode) {
+    oldNode.replaceWith(newNode);
+}
+// newNode插入到oldNode前面
+export function insertBefore(newNode, oldNode) {
+    oldNode.parentNode.insertBefore(newNode, oldNode);
+}
+// newNode插入到oldNode后面
+export function insertAfter(newNode, oldNode) {
+    const parent = oldNode.parentNode;
+    if (parent.lastChild === oldNode) {
+        parent.appendChild(newNode);
+    } else {
+        const refNode = oldNode.nextSibling;
+        parent.insertBefore(newNode, refNode);
+    }
 }
 export function on(el, eventName, callback, useCapture) {
     el.addEventListener(eventName, callback, useCapture);
@@ -53,6 +74,17 @@ export function off(el, eventName, callback) {
 // 判断组件名是否一致 ref test/componentName.test.js
 export function checkComponent(id1, id2) {
     return camelCase(id1) === camelCase(id2);
+}
+// 获取组件
+export function getComponent(components, name) {
+    let component = null;
+    for (let [key, value] of Object.entries(components)) {
+        if (checkComponent(name, key)) {
+            component = value;
+            break;
+        }
+    }
+    return component;
 }
 
 export const toArray = Array.from;

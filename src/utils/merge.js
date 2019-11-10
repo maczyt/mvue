@@ -1,4 +1,4 @@
-import { hasOwn, isObject } from ".";
+import { hasOwn, isObject, toArray } from ".";
 
 function defaultStrat(parentVal, childVal) {
     return childVal === undefined ? parentVal : childVal
@@ -36,9 +36,9 @@ const strats = {
  * @param {*} vm 
  */
 export function mergeOptions(parent, child, vm) {
-    guardComponents(child);
+    // 对象组件化
+    guardComponents(child, vm);
 
-    // 暂不支持mixins、extends
     const options = {};
     let key;
     for (key in parent) {
@@ -58,6 +58,24 @@ export function mergeOptions(parent, child, vm) {
     }
 
     return options;
+}
+/**
+ * 合并attrs
+ * @param {*} fromNode 
+ * @param {*} toNode 
+ */
+export function mergeAttrs(fromNode, toNode) {
+    const attrs = fromNode.attributes;
+    let name, value;
+    toArray(attrs).forEach(attr => {
+        name = attr.name;
+        value = attr.value;
+        if (name === 'class') {
+            toNode.classList.add(value);
+        }  else {
+            toNode.setAttribute(name, value);
+        }
+    });
 }
 
 /**
@@ -83,11 +101,11 @@ function mergeData(from, to) {
  * 处理组件components对象
  * @param {*} options 
  */
-function guardComponents(options) {
+function guardComponents(options, vm) {
     if (options.components) {
         const components = options.components;
         Object.keys(components).forEach(key => {
-            // MVue
-        })
+            components[key] = vm.constructor.component(key, components[key], true);
+        });
     }
 }

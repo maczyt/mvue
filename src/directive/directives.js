@@ -1,6 +1,7 @@
 import { off, on } from "../utils";
 import modelDirective from './model';
 import forDirective from './for';
+import componentDirective from './component';
 
 // 指令优先级
 const PRIORITY = {
@@ -81,5 +82,11 @@ export default {
     for: {
         priority: PRIORITY.for,
         ...forDirective,
+    },
+
+    // v-component 不对外暴露
+    component: {
+        priority: PRIORITY.component,
+        ...componentDirective,
     }
 }

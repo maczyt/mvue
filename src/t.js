@@ -14,9 +14,7 @@ window.subVm = new Sub({
             age: 24,
         }
     }
-})
-
-// console.log('Sub', Sub);
+});
 
 window.vm = new MVue({
     data() {
@@ -37,6 +35,11 @@ window.vm = new MVue({
         },
         decrement() {
             this.count --;
+        }
+    },
+    components: {
+        FooBar: {
+            template: '<h2>foo-bar</h2>'
         }
     },
     el: '#app',

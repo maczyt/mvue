@@ -52,7 +52,7 @@ function compileElement(node, vm) {
 
   if (!RE.commonTag.test(tag) && !RE.reservedTag.test(tag)) {
     // 说明是一个自定义组件
-    const keys = options.components;
+    const keys = Object.keys(options.components);
     if (keys.some(key => checkComponent(key, tag))) {
       des.push({
         vm,
